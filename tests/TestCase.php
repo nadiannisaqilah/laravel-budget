@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Inisiatif\LaravelBudget\Tests;
 
-use Orchestra\Testbench;
+use Orchestra\Testbench\TestCase as Orchestra;
 use Inisiatif\LaravelBudget\LaravelBudget;
 use Illuminate\Contracts\Config\Repository;
 use Inisiatif\LaravelBudget\LaravelBudgetServiceProvider;
 
-abstract class TestCase extends Testbench\TestCase
+abstract class TestCase extends Orchestra
 {
     protected function getPackageProviders($app): array
     {
@@ -41,12 +41,20 @@ abstract class TestCase extends Testbench\TestCase
         });
     }
 
-    protected function defineDatabaseMigrations(): void
+    /**
+     * Remigrate after mid-test config changes that affect schema.
+     * Ends any open RefreshDatabase transaction first (SQLite cannot VACUUM inside one).
+     */
+    protected function remigrate(): void
     {
-        Testbench\artisan($this, 'migrate', ['--database' => 'testing']);
+        $database = $this->app->make('db')->connection('testing');
 
-        $this->beforeApplicationDestroyed(
-            fn () => Testbench\artisan($this, 'migrate:rollback', ['--database' => 'testing'])
-        );
+        while ($database->transactionLevel() > 0) {
+            $database->rollBack();
+        }
+
+        $this->artisan('migrate:fresh', ['--database' => 'testing']);
+
+        $this->beginDatabaseTransaction();
     }
 }

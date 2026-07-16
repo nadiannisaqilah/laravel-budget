@@ -73,7 +73,7 @@ final class FetchOneBudgetControllerTest extends TestCase
 
         $this->app->singleton(BudgetConfig::class, fn () => $config);
 
-        $this->artisan('migrate:fresh');
+        $this->remigrate();
 
         /** @var HasBudget $budget */
         $budget = BudgetFactory::new([

@@ -58,7 +58,7 @@ final class InteractWithBudgetTest extends TestCase
 
         $this->app->singleton(BudgetConfig::class, fn () => $config);
 
-        $this->artisan('migrate:fresh');
+        $this->remigrate();
 
         BudgetFactory::new()->createOne([
             LaravelBudget::getVersionColumnName() => json_encode([

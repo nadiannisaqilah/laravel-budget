@@ -71,7 +71,7 @@ final class FilterBudgetControllerTest extends TestCase
 
         $this->app->singleton(BudgetConfig::class, fn () => $config);
 
-        $this->artisan('migrate:fresh');
+        $this->remigrate();
 
         $budget = BudgetFactory::new([
             LaravelBudget::getDescriptionColumnName() => 'Foo Bar',
